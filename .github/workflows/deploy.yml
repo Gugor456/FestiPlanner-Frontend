@@ -27,17 +27,19 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
 
-      - name: Upload image
+      - name: Upload image to VM
         run: |
           scp image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
 
-      - name: Deploy container
+      - name: Deploy container on VM
         run: |
-          ssh ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          ssh ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
 
-            docker load < image.tar
+            docker load < /home/ubuntu/image.tar
 
-            if [ "${GITHUB_REF##*/}" = "main" ]; then
+            BRANCH="${GITHUB_REF##*/}"
+
+            if [ "$BRANCH" = "main" ]; then
               docker stop festiplanner-prod || true
               docker rm festiplanner-prod || true
 
