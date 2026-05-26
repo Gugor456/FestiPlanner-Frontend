@@ -11,10 +11,6 @@ jobs:
   lint-test-build:
     runs-on: ubuntu-latest
 
-    defaults:
-      run:
-        working-directory: Festiplanner-Frontend
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
