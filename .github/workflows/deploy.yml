@@ -10,6 +10,9 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -23,9 +26,11 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
+
           echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.HOST }} >> ~/.ssh/known_hosts
+
+          ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
 
       - name: Upload image to VM
         run: |
