@@ -24,7 +24,7 @@ jobs:
         run: npm install
 
       - name: Lint project
-        run: npm run lint --if-present
+        run: npm run lint
 
       - name: Run tests
         run: npm run test --if-present
