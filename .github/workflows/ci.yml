@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  lint-test-build:
+  lint:
     runs-on: ubuntu-latest
 
     steps:
@@ -26,8 +26,42 @@ jobs:
       - name: Lint project
         run: npm run lint --if-present
 
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
+
       - name: Run tests
         run: npm run test --if-present
+
+
+  build:
+    runs-on: ubuntu-latest
+
+    needs: [lint, test]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm install
 
       - name: Build project
         run: npm run build
