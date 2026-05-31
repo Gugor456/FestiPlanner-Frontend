@@ -1,61 +1,66 @@
 name: Deploy Pipeline
 
 on:
-  workflow_run:
-    workflows: ["CI Pipeline"]
-    types:
-      - completed
+  push:
+    branches:
+      - main
+      - develop
 
 jobs:
   deploy:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     environment:
-      name: dev
+      name: ${{ github.ref_name == 'main' && 'production' || 'dev' }}
 
     steps:
-      - name: Download CI artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist
-          run-id: ${{ github.event.workflow_run.id }}
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t festiplanner-frontend .
+
+      - name: Save Docker image
+        run: docker save festiplanner-frontend > image.tar
 
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
 
-          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
           ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Upload artifact to VM
+      - name: Upload image to VM
         run: |
-          scp -i ~/.ssh/id_rsa -r dist ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/frontend-dist
+          scp image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
 
-      - name: Deploy on VM
+      - name: Deploy container on VM
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          ssh ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+
+            docker load < /home/ubuntu/image.tar
 
             BRANCH="${GITHUB_REF##*/}"
 
             if [ "$BRANCH" = "main" ]; then
-              PORT=80
-              NAME=festiplanner-prod
+              docker stop festiplanner-prod || true
+              docker rm festiplanner-prod || true
+
+              docker run -d \
+                -p 80:80 \
+                --name festiplanner-prod \
+                festiplanner-frontend
+
             else
-              PORT=3000
-              NAME=festiplanner-dev
+              docker stop festiplanner-dev || true
+              docker rm festiplanner-dev || true
+
+              docker run -d \
+                -p 3000:80 \
+                --name festiplanner-dev \
+                festiplanner-frontend
             fi
-
-            docker stop $NAME || true
-            docker rm $NAME || true
-
-            docker run -d \
-              --restart unless-stopped \
-              -p $PORT:80 \
-              --name $NAME \
-              nginx:alpine
 
           EOF
