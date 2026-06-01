@@ -1,9 +1,8 @@
 export default function Home() {
   return (
     <div>
-      <h1>FestiPlannerTEST</h1>
-      <p>React is UPDATED TO VERSION 15 correctly!!!!!!!!</p>
-      <p>UPDATE 2 TESTTEST</p>
+      <h1>FestiPlanner IS FINALLY UP AND RUNNING</h1>
+      <p>React is working correctly.</p>
     </div>
   )
 }
