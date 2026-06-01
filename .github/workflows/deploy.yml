@@ -17,7 +17,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Build Docker image (with env-aware base path)
+      - name: Build Docker image (correct env injection)
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
             docker build --build-arg VITE_BASE_PATH=/ -t festiplanner-frontend .
