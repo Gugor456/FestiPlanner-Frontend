@@ -2,11 +2,16 @@ FROM node:20 AS build
 
 WORKDIR /app
 
+# Accept build argument
+ARG VITE_BASE_PATH=/
+ENV VITE_BASE_PATH=$VITE_BASE_PATH
+
 COPY package*.json ./
 RUN npm install
 
 COPY . .
 
+# Build with environment-aware base path
 RUN npm run build
 
 
