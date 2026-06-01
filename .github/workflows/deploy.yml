@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     environment:
-      name: ${{ github.ref_name == 'main' && 'develop' }}
+      name: ${{ github.ref_name == 'main' && 'production' || 'develop' }}
 
     steps:
       - name: Checkout repository
@@ -56,7 +56,7 @@ jobs:
                 --name festiplanner-prod \
                 festiplanner-frontend
 
-            else
+            elif [ "$BRANCH" = "develop" ]; then
 
               docker stop festiplanner-dev || true
               docker rm festiplanner-dev || true
