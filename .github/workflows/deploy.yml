@@ -27,24 +27,27 @@ jobs:
         run: |
           mkdir -p ~/.ssh
 
-          echo "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
 
           ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
 
       - name: Upload image to VM
         run: |
-          scp image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
+          scp -i ~/.ssh/id_rsa image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
 
       - name: Deploy container on VM
         run: |
-          ssh ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+          BRANCH="${{ github.ref_name }}"
+
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
 
             docker load < /home/ubuntu/image.tar
 
-            BRANCH="${GITHUB_REF##*/}"
+            BRANCH="${BRANCH}"
 
             if [ "$BRANCH" = "main" ]; then
+
               docker stop festiplanner-prod || true
               docker rm festiplanner-prod || true
 
@@ -54,6 +57,7 @@ jobs:
                 festiplanner-frontend
 
             else
+
               docker stop festiplanner-dev || true
               docker rm festiplanner-dev || true
 
@@ -61,6 +65,7 @@ jobs:
                 -p 3000:80 \
                 --name festiplanner-dev \
                 festiplanner-frontend
+
             fi
 
           EOF
