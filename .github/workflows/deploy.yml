@@ -62,7 +62,7 @@ jobs:
               docker rm festiplanner-dev || true
 
               docker run -d \
-                -p 22:22 \
+                -p 8080:80 \
                 --name festiplanner-dev \
                 festiplanner-frontend
 
