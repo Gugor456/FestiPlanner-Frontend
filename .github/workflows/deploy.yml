@@ -1,0 +1,71 @@
+name: Deploy Pipeline
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    environment:
+      name: ${{ github.ref_name == 'main' && 'production' || 'develop' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t festiplanner-frontend .
+
+      - name: Save Docker image
+        run: docker save festiplanner-frontend > image.tar
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+
+          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload image to VM
+        run: |
+          scp -i ~/.ssh/id_rsa image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
+
+      - name: Deploy container on VM
+        run: |
+          BRANCH="${{ github.ref_name }}"
+
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+
+            docker load < /home/ubuntu/image.tar
+
+            BRANCH="${BRANCH}"
+
+            if [ "$BRANCH" = "main" ]; then
+
+              docker stop festiplanner-prod || true
+              docker rm festiplanner-prod || true
+
+              docker run -d \
+                -p 80:80 \
+                --name festiplanner-prod \
+                festiplanner-frontend
+
+            elif [ "$BRANCH" = "develop" ]; then
+
+              docker stop festiplanner-dev || true
+              docker rm festiplanner-dev || true
+
+              docker run -d \
+                -p 8080:80 \
+                --name festiplanner-dev \
+                festiplanner-frontend
+
+            fi
+
+          EOF
