@@ -26,10 +26,8 @@ jobs:
       - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
-
           printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
-
           ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
 
       - name: Upload image to VM
@@ -48,20 +46,20 @@ jobs:
 
             if [ "$BRANCH" = "main" ]; then
 
-              docker stop festiplanner-prod || true
-              docker rm festiplanner-prod || true
+              docker rm -f festiplanner-prod || true
 
               docker run -d \
-                -p 80:80 \
+                --restart unless-stopped \
+                -p 3000:80 \
                 --name festiplanner-prod \
                 festiplanner-frontend
 
             elif [ "$BRANCH" = "develop" ]; then
 
-              docker stop festiplanner-dev || true
-              docker rm festiplanner-dev || true
+              docker rm -f festiplanner-dev || true
 
               docker run -d \
+                --restart unless-stopped \
                 -p 8080:80 \
                 --name festiplanner-dev \
                 festiplanner-frontend
