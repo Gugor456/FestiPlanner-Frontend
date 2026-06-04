@@ -12,7 +12,14 @@ on:
       port:
         required: true
         type: string
-        
+      secrets:
+        SSH_KEY:
+          required: true
+        HOST:
+          required: true
+        USER:
+          required: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
