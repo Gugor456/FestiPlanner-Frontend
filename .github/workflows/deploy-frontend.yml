@@ -12,6 +12,13 @@ on:
       port:
         required: true
         type: string
+    secrets:
+      SSH_KEY:
+        required: true
+      HOST:
+        required: true
+      USER:
+        required: true
 
 jobs:
   deploy:
@@ -33,7 +40,7 @@ jobs:
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
 
-      - name: Deploy image
+      - name: Deploy
         run: |
           docker save ${{ inputs.image_name }} > image.tar
 
