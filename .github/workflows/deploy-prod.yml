@@ -40,6 +40,8 @@ jobs:
 
           docker load < /home/ubuntu/image.tar
 
+          docker tag festiplanner-frontend-prod:${{ github.sha }} festiplanner-frontend-prod:latest
+
           docker stop festiplanner-prod || true
           docker rm festiplanner-prod || true
 
@@ -49,7 +51,6 @@ jobs:
             --name festiplanner-prod \
             festiplanner-frontend-prod:latest
 
-          # 🧹 cleanup unused images (SAFE)
           docker image prune -f
 
           EOF
