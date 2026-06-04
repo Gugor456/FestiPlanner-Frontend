@@ -6,18 +6,8 @@ on:
       image_name:
         required: true
         type: string
-      container_name:
-        required: true
-        type: string
-      port:
-        required: true
-        type: string
     secrets:
       SSH_KEY:
-        required: true
-      HOST:
-        required: true
-      USER:
         required: true
 
 jobs:
