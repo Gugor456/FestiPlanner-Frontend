@@ -6,6 +6,7 @@ on:
 
 jobs:
   deploy:
+    environment: dev
     uses: ./.github/workflows/deploy-frontend.yml
     with:
       environment: dev
