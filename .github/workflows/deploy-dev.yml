@@ -8,9 +8,10 @@ jobs:
   deploy:
     uses: ./.github/workflows/deploy-frontend.yml
     with:
-      environment: dev
       image_name: festiplanner-frontend-dev:${{ github.sha }}
       container_name: festiplanner-frontend-dev
       port: "8080"
-    secrets: inherit
-    environment: dev
+    secrets:
+      SSH_KEY: ${{ secrets.SSH_KEY }}
+      HOST: ${{ secrets.HOST }}
+      USER: ${{ secrets.USER }}
