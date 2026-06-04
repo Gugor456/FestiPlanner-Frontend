@@ -12,13 +12,13 @@ on:
       port:
         required: true
         type: string
-      secrets:
-        SSH_KEY:
-          required: true
-        HOST:
-          required: true
-        USER:
-          required: true
+    secrets:
+      SSH_KEY:
+        required: true
+      HOST:
+        required: true
+      USER:
+        required: true
 
 jobs:
   deploy:
