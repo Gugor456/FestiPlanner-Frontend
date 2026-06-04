@@ -1,0 +1,49 @@
+name: Deploy Frontend (DEV)
+
+on:
+  push:
+    branches: [develop]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: develop
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VITE_BASE_PATH=/dev/ \
+            -t festiplanner-frontend-dev:${{ github.sha }} .
+
+      - name: Save Docker image
+        run: docker save festiplanner-frontend-dev:${{ github.sha }} > image.tar
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Upload image to VM
+        run: |
+          scp -i ~/.ssh/id_rsa image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
+
+      - name: Deploy container
+        run: |
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+
+            docker load < /home/ubuntu/image.tar
+
+            docker rm -f festiplanner-dev || true
+
+            docker run -d \
+              --restart unless-stopped \
+              -p 8080:80 \
+              --name festiplanner-dev \
+              festiplanner-frontend-dev:${{ github.sha }}
+
+          EOF
