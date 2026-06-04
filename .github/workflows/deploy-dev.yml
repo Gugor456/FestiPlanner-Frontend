@@ -14,7 +14,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t festiplanner-frontend-dev:${{ github.sha }} .
+          docker build \
+            --build-arg VITE_MODE=dev \
+            -t festiplanner-frontend-dev:${{ github.sha }} .
 
       - name: SSH setup
         run: |

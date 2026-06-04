@@ -14,7 +14,9 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t festiplanner-frontend-prod:${{ github.sha }} .
+          docker build \
+            --build-arg VITE_MODE=prod \
+            -t festiplanner-frontend-prod:${{ github.sha }} .
 
       - name: SSH setup
         run: |
