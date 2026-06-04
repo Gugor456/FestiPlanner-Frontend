@@ -7,7 +7,6 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-
     environment: dev
 
     steps:
@@ -15,9 +14,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build \
-            --build-arg VITE_BASE_PATH=${{ vars.VITE_BASE_PATH }} \
-            -t festiplanner-frontend-dev:${{ github.sha }} .
+          docker build -t festiplanner-frontend-dev:${{ github.sha }} .
 
       - name: SSH setup
         run: |

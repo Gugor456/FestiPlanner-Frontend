@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom'
 import App from './App'
 import './style.css'
 
-const base = import.meta.env.VITE_BASE_PATH || '/'
+const base = import.meta.env.BASE_URL
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
