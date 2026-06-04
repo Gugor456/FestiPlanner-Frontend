@@ -7,16 +7,42 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     environment: prod
 
     steps:
-      - name: Call reusable workflow
-        uses: ./.github/workflows/deploy-frontend.yml
-        with:
-          image_name: festiplanner-frontend-prod:${{ github.sha }}
-          container_name: festiplanner-frontend-prod
-          port: "3000"
-        secrets:
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-          HOST: ${{ secrets.HOST }}
-          USER: ${{ secrets.USER }}
+      - uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: |
+          docker build \
+            --build-arg VITE_BASE_PATH=${{ vars.VITE_BASE_PATH }} \
+            -t festiplanner-frontend-prod:${{ github.sha }} .
+
+      - name: SSH setup
+        run: |
+          mkdir -p ~/.ssh
+          printf "%s" "${{ secrets.SSH_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H "${{ secrets.HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Deploy
+        run: |
+          docker save festiplanner-frontend-prod:${{ github.sha }} > image.tar
+
+          scp -i ~/.ssh/id_rsa image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
+
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+
+            docker load < /home/ubuntu/image.tar
+
+            docker stop festiplanner-frontend-prod || true
+            docker rm festiplanner-frontend-prod || true
+
+            docker run -d \
+              --name festiplanner-frontend-prod \
+              --restart unless-stopped \
+              -p 3000:80 \
+              festiplanner-frontend-prod:${{ github.sha }}
+
+          EOF
