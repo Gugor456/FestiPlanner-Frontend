@@ -20,13 +20,19 @@ jobs:
       - name: Build Docker image (correct env injection)
         run: |
           if [ "${{ github.ref_name }}" = "main" ]; then
-            docker build --build-arg VITE_BASE_PATH=/ -t festiplanner-frontend .
+            docker build \
+              --build-arg VITE_BASE_PATH=/ \
+              -t festiplanner-frontend:${{ github.sha }} .
+              docker tag festiplanner-frontend:${{ github.sha }} festiplanner-frontend:latest
           else
-            docker build --build-arg VITE_BASE_PATH=/dev/ -t festiplanner-frontend .
+            docker build \
+              --build-arg VITE_BASE_PATH=/dev/ \
+              -t festiplanner-frontend:${{ github.sha }} .
+              docker tag festiplanner-frontend:${{ github.sha }} festiplanner-frontend:latest
           fi
 
       - name: Save Docker image
-        run: docker save festiplanner-frontend > image.tar
+        run: docker save festiplanner-frontend:${{ github.sha }} > image.tar
 
       - name: Setup SSH
         run: |
