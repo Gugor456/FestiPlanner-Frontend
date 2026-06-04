@@ -6,9 +6,17 @@ on:
 
 jobs:
   deploy:
+    runs-on: ubuntu-latest
     environment: dev
-    uses: ./.github/workflows/deploy-frontend.yml
-    with:
-      image_name: festiplanner-frontend-dev:${{ github.sha }}
-      container_name: festiplanner-frontend-dev
-      port: "8080"
+
+    steps:
+      - name: Call reusable workflow
+        uses: ./.github/workflows/deploy-frontend.yml
+        with:
+          image_name: festiplanner-frontend-dev:${{ github.sha }}
+          container_name: festiplanner-frontend-dev
+          port: "8080"
+        secrets:
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+          HOST: ${{ secrets.HOST }}
+          USER: ${{ secrets.USER }}
