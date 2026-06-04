@@ -18,7 +18,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
+          cache: 'npm'
 
       - name: Install dependencies
         run: npm install
@@ -37,8 +38,8 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-
+          node-version: 20
+          cache: 'npm'
       - name: Install dependencies
         run: npm install
 
@@ -58,16 +59,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
-
+          node-version: 20
+          cache: 'npm'
       - name: Install dependencies
         run: npm install
-
-      - name: Build project
-        run: npm run build
-
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: frontend-dist
-          path: dist

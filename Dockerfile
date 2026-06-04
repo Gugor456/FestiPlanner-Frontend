@@ -8,7 +8,9 @@ RUN npm install
 COPY . .
 
 ARG VITE_BASE_PATH=/
-RUN VITE_BASE_PATH=$VITE_BASE_PATH npm run build
+ENV VITE_BASE_PATH=$VITE_BASE_PATH
+
+RUN npm run build
 
 
 FROM nginx:alpine
@@ -16,5 +18,7 @@ FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 
 EXPOSE 80
+
+HEALTHCHECK CMD wget -qO- http://localhost || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
