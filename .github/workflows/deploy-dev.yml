@@ -11,7 +11,4 @@ jobs:
       image_name: festiplanner-frontend-dev:${{ github.sha }}
       container_name: festiplanner-frontend-dev
       port: "8080"
-    secrets:
-      SSH_KEY: ${{ secrets.SSH_KEY }}
-      HOST: ${{ secrets.HOST }}
-      USER: ${{ secrets.USER }}
+    secrets: inherit
