@@ -16,7 +16,8 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_BASE_PATH=/ \
-            -t festiplanner-frontend-prod:${{ github.sha }} .
+            -t festiplanner-frontend-prod:${{ github.sha }} \
+            -t festiplanner-frontend-prod:latest .
 
       - name: Save Docker image
         run: docker save festiplanner-frontend-prod:${{ github.sha }} > image.tar
@@ -34,16 +35,21 @@ jobs:
 
       - name: Deploy container
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          set -e
 
-            docker load < /home/ubuntu/image.tar
+          docker load < /home/ubuntu/image.tar
 
-            docker rm -f festiplanner-prod || true
+          docker stop festiplanner-prod || true
+          docker rm festiplanner-prod || true
 
-            docker run -d \
-              --restart unless-stopped \
-              -p 3000:80 \
-              --name festiplanner-prod \
-              festiplanner-frontend-prod:${{ github.sha }}
+          docker run -d \
+            --restart unless-stopped \
+            -p 3000:80 \
+            --name festiplanner-prod \
+            festiplanner-frontend-prod:latest
+
+          # 🧹 cleanup unused images (SAFE)
+          docker image prune -f
 
           EOF

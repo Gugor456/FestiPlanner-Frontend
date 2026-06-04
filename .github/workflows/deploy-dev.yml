@@ -2,7 +2,7 @@ name: Deploy Frontend (DEV)
 
 on:
   push:
-    branches: [dev]
+    branches: [develop]
 
 jobs:
   deploy:
@@ -16,7 +16,8 @@ jobs:
         run: |
           docker build \
             --build-arg VITE_BASE_PATH=/dev/ \
-            -t festiplanner-frontend-dev:${{ github.sha }} .
+            -t festiplanner-frontend-dev:${{ github.sha }} \
+            -t festiplanner-frontend-dev:latest .
 
       - name: Save Docker image
         run: docker save festiplanner-frontend-dev:${{ github.sha }} > image.tar
@@ -34,16 +35,21 @@ jobs:
 
       - name: Deploy container
         run: |
-          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << EOF
+          ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
+          set -e
 
-            docker load < /home/ubuntu/image.tar
+          docker load < /home/ubuntu/image.tar
 
-            docker rm -f festiplanner-dev || true
+          docker stop festiplanner-dev || true
+          docker rm festiplanner-dev || true
 
-            docker run -d \
-              --restart unless-stopped \
-              -p 8080:80 \
-              --name festiplanner-dev \
-              festiplanner-frontend-dev:${{ github.sha }}
+          docker run -d \
+            --restart unless-stopped \
+            -p 8080:80 \
+            --name festiplanner-dev \
+            festiplanner-frontend-dev:latest
+
+          # 🧹 cleanup unused images (SAFE)
+          docker image prune -f
 
           EOF
