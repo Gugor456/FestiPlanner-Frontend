@@ -11,4 +11,4 @@ jobs:
       image_name: festiplanner-frontend-prod:${{ github.sha }}
       container_name: festiplanner-frontend-prod
       port: "3000"
-    secrets: inherit
+      secrets: inherit
