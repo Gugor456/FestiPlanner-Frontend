@@ -9,6 +9,7 @@ on:
 
 jobs:
   deploy:
+    environment: dev
     name: Deploy to vm
     runs-on: ubuntu-latest
     
