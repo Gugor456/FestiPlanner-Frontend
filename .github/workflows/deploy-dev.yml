@@ -1,13 +1,18 @@
 name: Deploy Frontend (DEV)
 
-on:
-  push:
-    branches: [develop]
+on: 
+  workflow_run:
+    workflows: 
+      - CI Pipeline
+    types:
+      - completed
 
 jobs:
   deploy:
+    name: Deploy to vm
     runs-on: ubuntu-latest
-    environment: dev
+    
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - uses: actions/checkout@v4
@@ -40,6 +45,8 @@ jobs:
 
           docker load < /home/ubuntu/image.tar
 
+          docker tag festiplanner-frontend-dev:${{ github.sha }} festiplanner-frontend-dev:latest
+
           docker stop festiplanner-dev || true
           docker rm festiplanner-dev || true
 
@@ -49,7 +56,6 @@ jobs:
             --name festiplanner-dev \
             festiplanner-frontend-dev:latest
 
-          # 🧹 cleanup unused images (SAFE)
           docker image prune -f
 
           EOF
