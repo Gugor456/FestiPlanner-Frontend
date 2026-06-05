@@ -7,10 +7,11 @@ RUN npm install
 
 COPY . .
 
-RUN npm run build
-
 ARG VITE_BASE_PATH=/
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
+
+RUN npm run build
+
 
 FROM nginx:alpine
 
