@@ -7,7 +7,6 @@ on:
     types:
       - completed
 
-
 jobs:
   deploy:
     environment: dev
