@@ -40,7 +40,6 @@ jobs:
 
           docker load < /home/ubuntu/image.tar
 
-          # ✅ FIX: create latest tag locally
           docker tag festiplanner-frontend-dev:${{ github.sha }} festiplanner-frontend-dev:latest
 
           docker stop festiplanner-dev || true
