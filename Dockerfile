@@ -9,6 +9,8 @@ COPY . .
 
 RUN npm run build
 
+ARG VITE_BASE_PATH=/
+ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
 FROM nginx:alpine
 
