@@ -7,7 +7,7 @@ RUN npm install
 
 COPY . .
 
-ARG VITE_BASE_PATH=/
+ARG VITE_BASE_PATH=prod
 ENV VITE_BASE_PATH=$VITE_BASE_PATH
 
 RUN npm run build
