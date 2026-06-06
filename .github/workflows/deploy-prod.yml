@@ -29,7 +29,7 @@ jobs:
             -t festiplanner-frontend-prod:latest .
 
       - name: Save Docker image
-        run: docker save festiplanner-frontend-prod:${{ github.sha }} > image.tar
+        run: docker save festiplanner-frontend-prod:${{ github.sha }} > image-prod.tar
 
       - name: Setup SSH
         run: |
@@ -40,14 +40,14 @@ jobs:
 
       - name: Upload image to VM
         run: |
-          scp -i ~/.ssh/id_rsa image.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
+          scp -i ~/.ssh/id_rsa image-prod.tar ${{ secrets.USER }}@${{ secrets.HOST }}:/home/ubuntu/
 
       - name: Deploy container
         run: |
           ssh -i ~/.ssh/id_rsa ${{ secrets.USER }}@${{ secrets.HOST }} << 'EOF'
           set -e
 
-          docker load < /home/ubuntu/image.tar
+          docker load < /home/ubuntu/image-prod.tar
 
           docker tag festiplanner-frontend-prod:${{ github.sha }} festiplanner-frontend-prod:latest
 
@@ -61,5 +61,4 @@ jobs:
             festiplanner-frontend-prod:latest
 
           docker image prune -f
-
           EOF
